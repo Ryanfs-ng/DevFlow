@@ -1,0 +1,165 @@
+<div class="dashboard">
+  <!-- Welcome -->
+  <div class="dashboard-welcome animate-fade-in">
+    @if (auth.currentUser(); as user) {
+      <div>
+        <h1>{{ getGreeting() }}, {{ user.name.split(' ')[0] }} 👋</h1>
+        <p>Aqui está um resumo do que está acontecendo hoje.</p>
+      </div>
+    }
+    <button class="btn btn-primary" routerLink="/board/b1">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Nova Tarefa
+    </button>
+  </div>
+
+  <!-- Metrics Cards -->
+  <div class="metrics-grid">
+    <div class="metric-card animate-fade-in stagger-1">
+      <div class="metric-icon metric-icon--total">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+      </div>
+      <div class="metric-content">
+        <span class="metric-value">{{ metrics().total }}</span>
+        <span class="metric-label">Total de Tarefas</span>
+      </div>
+      <div class="metric-trend trend-up">↑ 12%</div>
+    </div>
+
+    <div class="metric-card animate-fade-in stagger-2">
+      <div class="metric-icon metric-icon--doing">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </div>
+      <div class="metric-content">
+        <span class="metric-value">{{ metrics().doing }}</span>
+        <span class="metric-label">Em Execução</span>
+      </div>
+      <div class="metric-trend trend-neutral">→ Estável</div>
+    </div>
+
+    <div class="metric-card animate-fade-in stagger-3">
+      <div class="metric-icon metric-icon--done">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <div class="metric-content">
+        <span class="metric-value">{{ metrics().done }}</span>
+        <span class="metric-label">Finalizadas</span>
+      </div>
+      <div class="metric-trend trend-up">↑ 8%</div>
+    </div>
+
+    <div class="metric-card animate-fade-in stagger-4" [class.has-danger]="metrics().overdue > 0">
+      <div class="metric-icon metric-icon--overdue">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+      </div>
+      <div class="metric-content">
+        <span class="metric-value">{{ metrics().overdue }}</span>
+        <span class="metric-label">Atrasadas</span>
+      </div>
+      @if (metrics().overdue > 0) {
+        <div class="metric-trend trend-down">↓ Atenção</div>
+      }
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-grid">
+    <div class="chart-card animate-fade-in stagger-2">
+      <div class="chart-header">
+        <div>
+          <h3>Atividade da Semana</h3>
+          <p>Tarefas concluídas vs em execução</p>
+        </div>
+        <select class="chart-select">
+          <option>Esta semana</option>
+          <option>Mês atual</option>
+        </select>
+      </div>
+      <div class="chart-body">
+        <canvas #barChart></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card animate-fade-in stagger-3">
+      <div class="chart-header">
+        <div>
+          <h3>Distribuição por Status</h3>
+          <p>Visão geral do progresso atual</p>
+        </div>
+      </div>
+      <div class="chart-body chart-body--donut">
+        <canvas #donutChart></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Boards + Recent Tasks -->
+  <div class="bottom-grid">
+    <!-- Boards Overview -->
+    <div class="section-card animate-fade-in stagger-3">
+      <div class="section-header">
+        <h3>Boards Ativos</h3>
+        <a class="section-link" routerLink="/boards">Ver todos →</a>
+      </div>
+      <div class="boards-list">
+        @for (board of boards(); track board.id) {
+          <a class="board-row" [routerLink]="['/board', board.id]">
+            <div class="board-emoji-icon" [style.background]="board.color + '20'" [style.color]="board.color">
+              {{ board.emoji }}
+            </div>
+            <div class="board-row-info">
+              <span class="board-row-name">{{ board.name }}</span>
+              <span class="board-row-meta">{{ board.completedCount }}/{{ board.taskCount }} tarefas</span>
+            </div>
+            <div class="board-row-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width]="getBoardProgress(board) + '%'" [style.background]="board.color"></div>
+              </div>
+              <span class="progress-pct">{{ getBoardProgress(board) }}%</span>
+            </div>
+          </a>
+        }
+      </div>
+    </div>
+
+    <!-- Recent Tasks -->
+    <div class="section-card animate-fade-in stagger-4">
+      <div class="section-header">
+        <h3>Atividade Recente</h3>
+        <a class="section-link" routerLink="/tasks">Ver todas →</a>
+      </div>
+      <div class="tasks-list">
+        @for (task of recentTasks(); track task.id) {
+          <div class="task-row">
+            <div class="task-row-status" [attr.data-status]="task.status"></div>
+            <div class="task-row-info">
+              <span class="task-row-title">{{ task.title }}</span>
+              <div class="task-row-meta">
+                <span class="badge badge-neutral">{{ getStatusLabel(task.status) }}</span>
+                <span class="priority priority-{{task.priority}}">{{ getPriorityLabel(task.priority) }}</span>
+              </div>
+            </div>
+            @if (task.assignees.length > 0) {
+              <div class="task-row-assignees">
+                @for (a of task.assignees.slice(0, 2); track a.id) {
+                  <div class="avatar avatar-sm" [style.background]="a.color" [title]="a.name">{{ a.initials }}</div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
