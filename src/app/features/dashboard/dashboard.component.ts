@@ -31,8 +31,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     public auth: AuthService
   ) {}
 
-  ngOnInit() {
-    this.metrics.set(this.boardService.getDashboardMetrics());
+  async ngOnInit() {
+    await Promise.all([this.boardService.loadBoards(), this.boardService.loadAllTasks()]);
+    this.metrics.set(await this.boardService.getDashboardMetrics());
     this.boards.set(this.boardService.getBoards()().slice(0, 4));
     this.recentTasks.set(
       [...this.boardService.getTasks()()]

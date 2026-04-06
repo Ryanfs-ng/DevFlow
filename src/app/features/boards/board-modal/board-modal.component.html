@@ -1,0 +1,74 @@
+<div class="modal-overlay" (click)="onOverlayClick($event)">
+  <div class="modal-panel" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ isEdit ? 'Editar board' : 'Novo board' }}</h2>
+      <button type="button" class="btn-icon" (click)="close.emit()" aria-label="Fechar">×</button>
+    </div>
+
+    <div class="modal-body">
+      @if (errorMsg()) {
+        <div class="alert-error" role="alert">{{ errorMsg() }}</div>
+      }
+      <label class="field">
+        <span class="field-label">Nome</span>
+        <input type="text" class="input" [(ngModel)]="name" placeholder="Ex.: Sprint 24" maxlength="120" />
+      </label>
+
+      <label class="field">
+        <span class="field-label">Descrição (opcional)</span>
+        <textarea class="input textarea" [(ngModel)]="description" rows="2" placeholder="Breve objetivo do board"></textarea>
+      </label>
+
+      <div class="field">
+        <span class="field-label">Cor</span>
+        <div class="color-row">
+          @for (c of colorPresets; track c) {
+            <button
+              type="button"
+              class="color-dot"
+              [class.active]="color === c"
+              [style.background]="c"
+              (click)="color = c"
+              [attr.aria-label]="'Cor ' + c"
+            ></button>
+          }
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Emoji</span>
+        <div class="emoji-row">
+          @for (em of emojiPresets; track em) {
+            <button type="button" class="emoji-btn" [class.active]="emoji === em" (click)="emoji = em">{{ em }}</button>
+          }
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Membros</span>
+        <p class="field-hint">Você sempre faz parte do board. Marque quem mais participa.</p>
+        <div class="member-chips">
+          @for (m of members; track m.id) {
+            <label class="member-chip" [class.disabled]="isSelf(m.id)">
+              <input
+                type="checkbox"
+                [checked]="isMemberChecked(m.id)"
+                [disabled]="isSelf(m.id)"
+                (click)="$event.preventDefault(); toggleMember(m.id)"
+              />
+              <span class="avatar avatar-sm" [style.background]="m.color">{{ m.initials }}</span>
+              <span>{{ m.name }}</span>
+            </label>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-ghost" (click)="close.emit()">Cancelar</button>
+      <button type="button" class="btn btn-primary" [disabled]="!name.trim() || saving()" (click)="save()">
+        {{ saving() ? (isEdit ? 'Salvando…' : 'Criando…') : (isEdit ? 'Salvar alterações' : 'Criar board') }}
+      </button>
+    </div>
+  </div>
+</div>

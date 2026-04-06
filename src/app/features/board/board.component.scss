@@ -50,6 +50,48 @@
   gap: var(--space-3);
 }
 
+.board-menu-wrap {
+  position: relative;
+}
+
+.board-menu-btn {
+  font-size: 18px;
+  letter-spacing: 2px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.board-header-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  min-width: 160px;
+  padding: 4px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 50;
+
+  button {
+    text-align: left;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 13px;
+    cursor: pointer;
+    &:hover { background: var(--bg-raised); }
+    &.danger { color: #f87171; }
+    &.danger:hover { background: rgba(248, 113, 113, 0.12); }
+  }
+}
+
 .board-members {
   display: flex;
   .avatar {

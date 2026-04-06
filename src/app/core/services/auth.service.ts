@@ -1,48 +1,8 @@
 import { Injectable, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { User, AuthCredentials, AuthResponse } from '../models/models';
-
-const MOCK_USERS: User[] = [
-  {
-    id: '1',
-    name: 'Ryan Ferreira',
-    email: 'ryan@devflow.com',
-    initials: 'RF',
-    role: 'admin',
-    color: '#6366F1'
-  },
-  {
-    id: '2',
-    name: 'Pedro Paulo',
-    email: 'pedro@devflow.com',
-    initials: 'PP',
-    role: 'developer',
-    color: '#22D3EE'
-  },
-  {
-    id: '3',
-    name: 'João',
-    email: 'joao@devflow.com',
-    initials: 'JV',
-    role: 'designer',
-    color: '#10B981'
-  },
-  {
-    id: '4',
-    name: 'Enzo Gabriel',
-    email: 'enzo@devflow.com',
-    initials: 'EG',
-    role: 'qa',
-    color: '#F59E0B'
-  },
-  {
-    id: '5',
-    name: 'Felipe de Moura',
-    email: 'felipe@devflow.com',
-    initials: 'FM',
-    role: 'manager',
-    color: '#A855F7'
-  }
-];
+import { API_BASE_URL } from '../api.config';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -52,29 +12,17 @@ export class AuthService {
   currentUser = signal<User | null>(this.loadUser());
   isAuthenticated = signal<boolean>(!!this.loadToken());
 
-  login(credentials: AuthCredentials): Promise<AuthResponse> {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const user = MOCK_USERS.find(u => u.email === credentials.email);
+  constructor(private http: HttpClient) {}
 
-        if (user && credentials.password === 'devflow123') {
-          const mockToken = btoa(JSON.stringify({ userId: user.id, exp: Date.now() + 86400000 }));
-          const response: AuthResponse = {
-            token: mockToken,
-            user,
-            expiresIn: 86400
-          };
-
-          localStorage.setItem(this.TOKEN_KEY, mockToken);
-          localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-          this.currentUser.set(user);
-          this.isAuthenticated.set(true);
-          resolve(response);
-        } else {
-          reject(new Error('E-mail ou senha inválidos'));
-        }
-      }, 800); // simula latência de rede
-    });
+  async login(credentials: AuthCredentials): Promise<AuthResponse> {
+    const response = await firstValueFrom(
+      this.http.post<AuthResponse>(`${API_BASE_URL}/auth/login`, credentials)
+    );
+    localStorage.setItem(this.TOKEN_KEY, response.token);
+    localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
+    this.currentUser.set(response.user);
+    this.isAuthenticated.set(true);
+    return response;
   }
 
   logout(): void {
@@ -95,9 +43,5 @@ export class AuthService {
   private loadUser(): User | null {
     const raw = localStorage.getItem(this.USER_KEY);
     return raw ? JSON.parse(raw) : null;
-  }
-
-  getMockUsers(): User[] {
-    return MOCK_USERS;
   }
 }

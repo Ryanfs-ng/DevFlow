@@ -74,7 +74,7 @@ import { Task } from '../../core/models/models';
                 }
               </td>
               <td>
-                <span class="board-tag">Sprint 12</span>
+                <span class="board-tag" [title]="boardLabel(task.boardId)">{{ boardLabel(task.boardId) }}</span>
               </td>
             </tr>
           }
@@ -138,7 +138,10 @@ import { Task } from '../../core/models/models';
     .unassigned { font-size: 14px; color: var(--text-disabled); }
     .due-date { font-size: 13px; color: var(--text-secondary); font-family: var(--font-mono); &.overdue { color: var(--danger); } }
     .no-date { color: var(--text-disabled); }
-    .board-tag { font-size: 12px; padding: 3px 10px; border-radius: var(--radius-full); background: var(--bg-elevated); color: var(--text-secondary); }
+    .board-tag {
+      font-size: 12px; padding: 3px 10px; border-radius: var(--radius-full); background: var(--bg-elevated); color: var(--text-secondary);
+      display: inline-block; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;
+    }
   `]
 })
 export class TasksComponent implements OnInit {
@@ -162,7 +165,18 @@ export class TasksComponent implements OnInit {
 
   constructor(private boardService: BoardService) {}
 
-  ngOnInit() { this.tasks.set(this.boardService.getTasks()()); }
+  async ngOnInit() {
+    await Promise.all([
+      this.boardService.loadBoards(),
+      this.boardService.loadAllTasks()
+    ]);
+    this.tasks.set(this.boardService.getTasks()());
+  }
+
+  boardLabel(boardId: string): string {
+    const board = this.boardService.getBoardById(boardId);
+    return board?.name?.trim() || '—';
+  }
 
   setStatus(s: string) { this.activeStatus.set(s); }
 
