@@ -1,0 +1,11 @@
+{
+  "name": "devflow",
+  "private": true,
+  "description": "Monorepo local: scripts npm apontam para a app Angular em frontend/DevFlow",
+  "scripts": {
+    "start": "npm run start --prefix frontend/DevFlow",
+    "build": "npm run build --prefix frontend/DevFlow",
+    "test": "npm run test --prefix frontend/DevFlow",
+    "install:web": "npm install --prefix frontend/DevFlow"
+  }
+}

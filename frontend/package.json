@@ -1,0 +1,10 @@
+{
+  "name": "devflow-frontend",
+  "private": true,
+  "description": "Encaminha comandos npm para a app Angular em ./DevFlow",
+  "scripts": {
+    "start": "npm run start --prefix DevFlow",
+    "build": "npm run build --prefix DevFlow",
+    "test": "npm run test --prefix DevFlow"
+  }
+}
