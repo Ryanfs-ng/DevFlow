@@ -52,8 +52,8 @@ export class TaskModalComponent implements OnInit {
 
   constructor(private boardService: BoardService, public auth: AuthService) {}
 
-  ngOnInit() {
-    this.members = this.boardService.getMockUsers();
+  async ngOnInit() {
+    this.members = await this.boardService.getUsers();
     this.isEditing = !!this.task;
 
     if (this.task) {
@@ -92,38 +92,38 @@ export class TaskModalComponent implements OnInit {
     if (!this.title.trim()) return;
     this.saving.set(true);
 
-    await new Promise(r => setTimeout(r, 400)); // simula latência
+    try {
+      const assignees = this.members.filter(m => this.assigneeIds.has(m.id));
 
-    const assignees = this.members.filter(m => this.assigneeIds.has(m.id));
-
-    if (this.isEditing && this.task) {
-      this.boardService.updateTask(this.task.id, {
-        title: this.title,
-        description: this.description,
-        status: this.status,
-        priority: this.priority,
-        startDate: this.startDate || undefined,
-        dueDate: this.dueDate || undefined,
-        assignees,
-        tags: this.tags
-      });
-    } else {
-      this.boardService.createTask({
-        title: this.title,
-        description: this.description,
-        status: this.status,
-        priority: this.priority,
-        startDate: this.startDate || undefined,
-        dueDate: this.dueDate || undefined,
-        boardId: this.boardId,
-        assignees,
-        tags: this.tags,
-        order: 999
-      });
+      if (this.isEditing && this.task) {
+        await this.boardService.updateTask(this.task.id, {
+          title: this.title,
+          description: this.description,
+          status: this.status,
+          priority: this.priority,
+          startDate: this.startDate || undefined,
+          dueDate: this.dueDate || undefined,
+          assignees,
+          tags: this.tags
+        });
+      } else {
+        await this.boardService.createTask({
+          title: this.title,
+          description: this.description,
+          status: this.status,
+          priority: this.priority,
+          startDate: this.startDate || undefined,
+          dueDate: this.dueDate || undefined,
+          boardId: this.boardId,
+          assignees,
+          tags: this.tags,
+          order: 999
+        });
+      }
+      this.close.emit();
+    } finally {
+      this.saving.set(false);
     }
-
-    this.saving.set(false);
-    this.close.emit();
   }
 
   onDelete() {

@@ -1,15 +1,16 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, HostListener, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { BoardService, COLUMN_CONFIG } from '../../core/services/board.service';
 import { Task, TaskStatus, KanbanColumn, Board } from '../../core/models/models';
 import { TaskModalComponent } from './task-modal/task-modal.component';
+import { BoardModalComponent } from '../boards/board-modal/board-modal.component';
 
 @Component({
   selector: 'app-board',
   standalone: true,
-  imports: [CommonModule, DragDropModule, TaskModalComponent],
+  imports: [CommonModule, DragDropModule, TaskModalComponent, BoardModalComponent],
   templateUrl: './board.component.html',
   styleUrl: './board.component.scss'
 })
@@ -23,13 +24,50 @@ export class BoardComponent implements OnInit {
 
   columnIds = COLUMN_CONFIG.map(c => c.id);
 
+  boardMenuOpen = signal(false);
+  showBoardEditModal = signal(false);
+
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private boardService: BoardService
   ) {}
 
-  ngOnInit() {
-    this.boardId = this.route.snapshot.paramMap.get('id') ?? 'b1';
+  toggleBoardMenu() {
+    this.boardMenuOpen.update(v => !v);
+  }
+
+  openBoardEdit() {
+    this.boardMenuOpen.set(false);
+    this.showBoardEditModal.set(true);
+  }
+
+  async deleteCurrentBoard() {
+    this.boardMenuOpen.set(false);
+    const b = this.board();
+    if (!b) return;
+    if (!confirm(`Excluir o board "${b.name}"? Todas as tarefas serão apagadas.`)) return;
+    await this.boardService.deleteBoard(this.boardId);
+    void this.router.navigate(['/boards']);
+  }
+
+  onBoardUpdatedFromModal(updated: Board) {
+    this.board.set(updated);
+    this.showBoardEditModal.set(false);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(ev: MouseEvent) {
+    if (!this.boardMenuOpen()) return;
+    const t = ev.target as HTMLElement;
+    if (t.closest('.board-menu-wrap')) return;
+    this.boardMenuOpen.set(false);
+  }
+
+  async ngOnInit() {
+    this.boardId = this.route.snapshot.paramMap.get('id') ?? '';
+    await this.boardService.loadBoards();
+    await this.boardService.loadTasksByBoard(this.boardId);
     this.board.set(this.boardService.getBoardById(this.boardId));
     this.refreshColumns();
   }
@@ -38,14 +76,16 @@ export class BoardComponent implements OnInit {
     this.columns.set(this.boardService.getKanbanColumns(this.boardId));
   }
 
-  onDrop(event: CdkDragDrop<Task[]>, targetStatus: TaskStatus) {
+  async onDrop(event: CdkDragDrop<Task[]>, targetStatus: TaskStatus) {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-      event.container.data.forEach((t, i) => this.boardService.updateTask(t.id, { order: i }));
+      for (let i = 0; i < event.container.data.length; i++) {
+        await this.boardService.updateTask(event.container.data[i].id, { order: i });
+      }
     } else {
       transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
       const task = event.container.data[event.currentIndex];
-      this.boardService.moveTask(task.id, targetStatus, event.currentIndex);
+      await this.boardService.moveTask(task.id, targetStatus, event.currentIndex);
     }
     this.refreshColumns();
   }
@@ -67,8 +107,8 @@ export class BoardComponent implements OnInit {
     this.refreshColumns();
   }
 
-  deleteTask(id: string) {
-    this.boardService.deleteTask(id);
+  async deleteTask(id: string) {
+    await this.boardService.deleteTask(id);
     this.refreshColumns();
   }
 

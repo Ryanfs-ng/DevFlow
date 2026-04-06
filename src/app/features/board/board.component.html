@@ -11,6 +11,16 @@
       </div>
     </div>
     <div class="board-header-right">
+      <div class="board-menu-wrap">
+        <button type="button" class="btn btn-ghost btn-sm board-menu-btn" (click)="$event.stopPropagation(); toggleBoardMenu()"
+          aria-label="Opções do board">⋯</button>
+        @if (boardMenuOpen()) {
+          <div class="board-header-dropdown" (click)="$event.stopPropagation()">
+            <button type="button" (click)="openBoardEdit()">Editar board</button>
+            <button type="button" class="danger" (click)="deleteCurrentBoard()">Excluir board</button>
+          </div>
+        }
+      </div>
 
       <div class="board-members">
         @for (m of b.members.slice(0, 4); track m.id) {
@@ -150,6 +160,10 @@
     }
   </div>
 </div>
+
+@if (showBoardEditModal() && board(); as editB) {
+<app-board-modal [editBoard]="editB" (close)="showBoardEditModal.set(false)" (updated)="onBoardUpdatedFromModal($event)" />
+}
 
 @if (showModal()) {
 <app-task-modal [task]="editingTask()" [defaultStatus]="selectedStatus()" [boardId]="boardId" (close)="closeModal()"

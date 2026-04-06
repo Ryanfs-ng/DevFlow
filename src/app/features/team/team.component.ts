@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BoardService } from '../../core/services/board.service';
 import { User } from '../../core/models/models';
@@ -99,11 +99,17 @@ import { User } from '../../core/models/models';
     .w-full { width: 100%; justify-content: center; }
   `]
 })
-export class TeamComponent {
+export class TeamComponent implements OnInit {
   members: User[] = [];
 
-  constructor(private boardService: BoardService) {
-    this.members = this.boardService.getMockUsers();
+  constructor(private boardService: BoardService) {}
+
+  async ngOnInit() {
+    const [users] = await Promise.all([
+      this.boardService.getUsers(),
+      this.boardService.loadAllTasks()
+    ]);
+    this.members = users;
   }
 
   getRoleLabel(r: string): string {
