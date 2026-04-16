@@ -1,0 +1,74 @@
+<div class="tasks-page">
+    <div class="tasks-header">
+      <div>
+        <h1>Todas as Tarefas</h1>
+        <p>{{ tasks().length }} tarefas encontradas</p>
+      </div>
+      <div class="tasks-filters">
+        <div class="filter-group">
+          @for (s of statusFilters; track s.value) {
+            <button
+              class="filter-btn"
+              [class.active]="activeStatus() === s.value"
+              (click)="setStatus(s.value)"
+            >{{ s.label }}</button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="tasks-table-wrapper">
+      <table class="tasks-table">
+        <thead>
+          <tr>
+            <th>Tarefa</th>
+            <th>Status</th>
+            <th>Prioridade</th>
+            <th>Atribuído a</th>
+            <th>Data de Término</th>
+            <th>Board</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (task of filteredTasks(); track task.id) {
+            <tr class="task-row animate-fade-in">
+              <td>
+                <div class="task-cell-title">
+                  <div class="status-dot" [attr.data-status]="task.status"></div>
+                  <span>{{ task.title }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="status-badge" [attr.data-status]="task.status">
+                  {{ getStatusLabel(task.status) }}
+                </span>
+              </td>
+              <td>
+                <span class="priority priority-{{task.priority}}">{{ getPriorityLabel(task.priority) }}</span>
+              </td>
+              <td>
+                <div class="assignee-list">
+                  @for (a of task.assignees.slice(0, 3); track a.id) {
+                    <div class="avatar avatar-sm" [style.background]="a.color" [title]="a.name">{{ a.initials }}</div>
+                  }
+                  @if (task.assignees.length === 0) {
+                    <span class="unassigned">—</span>
+                  }
+                </div>
+              </td>
+              <td>
+                @if (task.dueDate) {
+                  <span class="due-date" [class.overdue]="isOverdue(task)">{{ formatDate(task.dueDate) }}</span>
+                } @else {
+                  <span class="no-date">—</span>
+                }
+              </td>
+              <td>
+                <span class="board-tag" [title]="boardLabel(task.boardId)">{{ boardLabel(task.boardId) }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>

@@ -6,7 +6,6 @@
   overflow: hidden;
 }
 
-// Header
 .board-header {
   display: flex;
   align-items: center;
@@ -190,7 +189,6 @@
   }
 }
 
-// Drop list
 .tasks-drop-list {
   flex: 1;
   overflow-y: auto;
@@ -201,7 +199,6 @@
   min-height: 80px;
 }
 
-// Task Card
 .task-card {
   background: var(--bg-raised);
   border: 1px solid var(--border);
@@ -230,7 +227,6 @@
   height: 80px;
 }
 
-// Priority stripe (left border indicator)
 .task-priority-stripe {
   position: absolute;
   top: 0; left: 0; bottom: 0;
@@ -333,7 +329,6 @@
   color: var(--text-muted);
 }
 
-// Empty state
 .col-empty {
   display: flex;
   flex-direction: column;
@@ -348,7 +343,6 @@
   svg { opacity: 0.4; }
 }
 
-// Add task button
 .col-add-btn {
   width: 100%;
   padding: 10px 14px;

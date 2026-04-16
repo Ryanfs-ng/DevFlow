@@ -8,7 +8,6 @@
   padding: 24px;
 }
 
-// Background
 .login-bg {
   position: fixed;
   inset: 0;
@@ -45,8 +44,12 @@
 }
 
 @keyframes blobFloat {
-  0%, 100% { transform: translateY(0) scale(1); }
-  50%       { transform: translateY(-20px) scale(1.05); }
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.05);
+  }
 }
 
 .blob-1 { animation: blobFloat 8s ease-in-out infinite; }
@@ -58,8 +61,12 @@
 }
 
 @keyframes blob3Float {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  50%       { transform: translate(-50%, -55%) scale(1.1); }
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -55%) scale(1.1);
+  }
 }
 
 .grid-overlay {
@@ -71,7 +78,6 @@
   background-size: 40px 40px;
 }
 
-// Container
 .login-container {
   position: relative;
   z-index: 1;
@@ -86,7 +92,6 @@
   box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.1);
 }
 
-// Logo
 .login-logo {
   display: flex;
   align-items: center;
@@ -116,7 +121,6 @@
   letter-spacing: -0.5px;
 }
 
-// Header
 .login-header {
   margin-bottom: 24px;
 
@@ -134,7 +138,6 @@
   }
 }
 
-// Hint
 .login-hint {
   display: flex;
   align-items: center;

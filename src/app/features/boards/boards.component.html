@@ -1,0 +1,91 @@
+<div class="boards-page" (click)="menuBoardId.set(null)">
+    <div class="boards-page-header">
+      <div>
+        <h1>Meus Boards</h1>
+        <p>Gerencie todos os seus projetos em um único lugar</p>
+      </div>
+      <button type="button" class="btn btn-primary" (click)="openCreate($event)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Novo Board
+      </button>
+    </div>
+
+    <div class="boards-grid">
+      @for (board of boards(); track board.id; let i = $index) {
+        <div class="board-card-wrap animate-fade-in" [class]="'stagger-' + (i+1)">
+          <a class="board-card" [routerLink]="['/board', board.id]">
+            <div class="board-card-accent" [style.background]="board.color"></div>
+            <div class="board-card-header">
+              <div class="board-emoji" [style.background]="board.color + '22'" [style.color]="board.color">
+                {{ board.emoji }}
+              </div>
+            </div>
+            <div class="board-card-body">
+              <h3>{{ board.name }}</h3>
+              <p>{{ board.description }}</p>
+            </div>
+            <div class="board-card-progress">
+              <div class="progress-info">
+                <span>Progresso</span>
+                <span class="progress-num">{{ board.completedCount }}/{{ board.taskCount }}</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width]="getProgress(board) + '%'" [style.background]="board.color"></div>
+              </div>
+            </div>
+            <div class="board-card-footer">
+              <div class="board-members">
+                @for (m of board.members.slice(0, 4); track m.id) {
+                  <div class="avatar avatar-sm" [style.background]="m.color" [title]="m.name">{{ m.initials }}</div>
+                }
+                @if (board.members.length > 4) {
+                  <div class="avatar avatar-sm avatar-more">+{{ board.members.length - 4 }}</div>
+                }
+              </div>
+              <span class="board-updated">Atualizado {{ formatDate(board.updatedAt) }}</span>
+            </div>
+          </a>
+          <div class="board-card-actions">
+            <button
+              type="button"
+              class="board-card-menu"
+              (click)="toggleMenu($event, board.id)"
+              aria-label="Menu do board"
+            >⋯</button>
+            @if (menuBoardId() === board.id) {
+              <div class="board-dropdown" (click)="$event.stopPropagation()">
+                <button type="button" (click)="openEdit(board, $event)">Editar</button>
+                <button type="button" class="danger" (click)="confirmDeleteBoard(board, $event)">Excluir</button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div
+        class="board-card board-card--new"
+        (click)="openCreate($event)"
+        (keydown.enter)="openCreate($event)"
+        tabindex="0"
+        role="button"
+      >
+        <div class="board-card-new-content">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          <span>Criar novo board</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  @if (boardModal() !== 'closed') {
+    <app-board-modal
+      [editBoard]="boardModal() === 'create' ? null : asBoard(boardModal())"
+      (close)="closeBoardModal()"
+      (created)="onBoardCreated($event)"
+      (updated)="onBoardUpdated($event)"
+    />
+  }
