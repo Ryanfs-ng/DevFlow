@@ -13,6 +13,7 @@ import com.DevFlow.DevFlow_BackEnd.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,12 +30,14 @@ public class TaskService {
     private final UserRepository userRepository;
     private final AuthService authService;
 
+    @Transactional(readOnly = true)
     public List<TaskResponseDTO> findAll() {
         return taskRepository.findAll().stream()
                 .map(this::toDTO)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<TaskResponseDTO> findByBoardId(UUID boardId) {
         return taskRepository.findByBoardId(boardId).stream()
                 .map(this::toDTO)
