@@ -2,9 +2,16 @@ name: DevFlow CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches:
+      - main
+      - master
+      - Backend
+
   pull_request:
-    branches: [ main, master ]
+    branches:
+      - main
+      - master
+      - Backend
 
 jobs:
   build:
@@ -12,7 +19,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: Backend/DevFlow/DevFlow-BackEnd
+        working-directory: DevFlow-BackEnd
 
     steps:
       - name: Checkout
